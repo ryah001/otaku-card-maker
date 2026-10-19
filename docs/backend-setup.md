@@ -18,6 +18,13 @@ mais le schéma n’est pas appliqué au projet distant par cette branche.
    avec la requête commentée à la fin de `src/lib/schema.sql`, en remplaçant
    `ADRESSE_DU_PROPRIETAIRE` par l’adresse exacte du compte.
 
+Pour attribuer un identifiant permanent par compte Google, examiner puis exécuter
+`src/lib/member-card-id.sql` après `src/lib/schema.sql`. Cette migration ajoute
+un numéro à chaque membre, préserve si possible le numéro de sa première carte
+déjà enregistrée, et crée la fonction protégée qui récupère ou attribue l’ID du
+compte connecté. L’application affiche le numéro après connexion. Les cartes
+elles-mêmes ne sont pas encore sauvegardées dans « Mes cartes ».
+
 Les insertions de suggestions associent toujours la ligne à `auth.uid()`. La
 lecture et la modération sont séparées par permission RLS. Les fonctions RPC de
 gestion des rôles vérifient `can_manage_admins` côté base; aucun mot de passe

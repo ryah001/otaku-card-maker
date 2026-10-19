@@ -331,7 +331,7 @@ export default function OtakuCard({ profile, layout: savedLayout, templateCatalo
               whiteSpace: "nowrap"
             }}
           >
-            {profile.cardNumber || "HUNTER 000001"}
+            {profile.cardNumber || "HUNTER ------"}
           </div>
 
           {/* Textes et Profils Noto Serif */}

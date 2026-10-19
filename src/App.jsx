@@ -167,7 +167,7 @@ function ProfileField({
   );
 }
 
-function CreatePage({ profile, setProfile, layout, templateCatalog }) {
+function CreatePage({ profile, setProfile, layout, templateCatalog, user, authReady, memberCardNumber, memberCardLoading, memberCardError }) {
   const updateProfile = (field) => (value) =>
     setProfile((current) => ({ ...current, [field]: value }));
   const selectedColor = templateCatalog.some((template) => template.template_key === profile.color)
@@ -270,8 +270,16 @@ function CreatePage({ profile, setProfile, layout, templateCatalog }) {
           </div>
           <div id="profile-photo-picker-slot" />
           <p className="panel-footnote">
-            Aperçu local. La connexion et l’enregistrement personnel seront
-            ajoutés dans les prochaines étapes.
+            {!authReady
+              ? "Vérification de ta connexion Google…"
+              : !user
+                ? "Connecte-toi avec Google pour obtenir ton ID permanent. Tu peux quand même personnaliser et télécharger ta carte."
+                : memberCardLoading
+                  ? "Attribution de ton ID permanent…"
+                  : memberCardNumber
+                    ? `Ton ID permanent : ${memberCardNumber}. Il reste lié à ce compte Google.`
+                    : memberCardError || "Ton ID permanent n’a pas pu être chargé."}
+            {user && <><br />Les cartes ne sont pas encore enregistrées dans « Mes cartes ».</>}
           </p>
         </section>
 
@@ -288,7 +296,11 @@ function CreatePage({ profile, setProfile, layout, templateCatalog }) {
               02
             </span>
           </div>
-          <OtakuCard profile={profile} layout={layout} templateCatalog={templateCatalog} />
+          <OtakuCard
+            profile={{ ...profile, cardNumber: memberCardNumber }}
+            layout={layout}
+            templateCatalog={templateCatalog}
+          />
         </section>
       </div>
     </>
@@ -684,6 +696,9 @@ function App() {
   const [membership, setMembership] = useState(null);
   const [publishedLayout, setPublishedLayout] = useState(null);
   const [templateCatalog, setTemplateCatalog] = useState(BUILTIN_TEMPLATE_CATALOG);
+  const [memberCardNumber, setMemberCardNumber] = useState("");
+  const [memberCardLoading, setMemberCardLoading] = useState(false);
+  const [memberCardError, setMemberCardError] = useState("");
   const user = session?.user ?? null;
   const userId = user?.id;
   const showAdmin = Boolean(membership && Object.values(membership).some(Boolean));
@@ -726,6 +741,38 @@ function App() {
       });
     return () => { active = false; };
   }, []);
+
+  useEffect(() => {
+    if (!userId) {
+      setMemberCardNumber("");
+      setMemberCardLoading(false);
+      setMemberCardError("");
+      return undefined;
+    }
+
+    let active = true;
+    setMemberCardNumber("");
+    setMemberCardLoading(true);
+    setMemberCardError("");
+    supabase.rpc("ensure_current_member")
+      .then(({ data, error }) => {
+        if (!active) return;
+        setMemberCardLoading(false);
+        if (error || typeof data !== "string" || !data) {
+          console.error("Unable to retrieve persistent member card number", error);
+          setMemberCardError("Impossible d’attribuer ton ID. La migration Supabase pour les ID permanents doit être exécutée.");
+          return;
+        }
+        setMemberCardNumber(data);
+      })
+      .catch((error) => {
+        if (!active) return;
+        console.error("Unable to retrieve persistent member card number", error);
+        setMemberCardLoading(false);
+        setMemberCardError("La récupération de ton ID a échoué. Vérifie ta connexion et réessaie.");
+      });
+    return () => { active = false; };
+  }, [userId]);
 
   useEffect(() => {
     if (!supabase) return undefined;
@@ -870,6 +917,11 @@ function App() {
               profile={profile}
               setProfile={setProfile}
               templateCatalog={templateCatalog}
+              user={user}
+              authReady={authReady}
+              memberCardNumber={memberCardNumber}
+              memberCardLoading={memberCardLoading}
+              memberCardError={memberCardError}
             />
           )}
           {activePage === "collection" && (

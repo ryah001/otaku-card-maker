@@ -1,16 +1,28 @@
-# React + Vite
+# HUNTERS ANIMES — Otaku Card Maker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Application React/Vite pour créer et télécharger une carte Otaku HUNTERS ANIMES.
+Le projet fourni comprend l’aperçu de carte, les modèles de couleur, les pages
+Collection et À propos, ainsi que l’authentification et la boîte à idées prévues
+avec Supabase.
 
-Currently, two official plugins are available:
+## Développement
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```sh
+npm ci
+npm run dev
+```
 
-## React Compiler
+Pour activer Google Auth et les suggestions, configure les variables locales
+indiquées dans [`.env.example`](.env.example), active Google dans Supabase Auth,
+puis applique le schéma décrit dans [`docs/backend-setup.md`](docs/backend-setup.md).
+Sans cette configuration, l’application reste en mode aperçu et ne prétend pas
+enregistrer de suggestions.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Vérifications
 
-## Expanding the ESLint configuration
+```sh
+npm run build
+npm run lint
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+La version publique n’est mise à jour que lors d’une publication distincte.

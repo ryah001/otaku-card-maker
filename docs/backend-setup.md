@@ -26,11 +26,19 @@ doivent déjà s’être connectés au moins une fois avec Google.
 
 ## Modèles et éditeur visuel
 
-Le schéma prépare `card_templates` pour les modèles/couleurs et
-`layout_versions` pour les brouillons et versions publiées. Modifier un brouillon
-et publier une version sont deux permissions distinctes. L’éditeur visuel et son
-flux d’aperçu/publication restent à construire dans l’interface; ces tables ne
-les activent pas à elles seules.
+Le schéma crée `card_templates` pour les modèles/couleurs et `layout_versions`
+pour les brouillons et versions publiées. L’interface permet de renommer et
+retirer des modèles des choix publics, d’ajouter une image comme brouillon, et de
+modifier puis prévisualiser la disposition avant publication. Modifier une
+disposition et la publier sont deux permissions distinctes.
+
+Pour permettre l’ajout d’images de modèles, examiner puis exécuter
+`src/lib/card-template-storage.sql` après `src/lib/schema.sql`. Ce script crée le
+bucket public `card-templates`, limite les fichiers à 5 Mo et aux formats PNG,
+JPG et WEBP, et réserve l’ajout/suppression aux administrateurs ayant la
+permission `manage_templates`. Les images publiées sont lisibles publiquement
+pour pouvoir apparaître sur les cartes. Le script n’est pas appliqué au projet
+Supabase par cette branche.
 
 ## Contrôle avant publication
 

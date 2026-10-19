@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import "./App.css";
 import OtakuCard from "./OtakuCard";
+import LayoutEditor from "./LayoutEditor";
+import TemplateManager from "./TemplateManager";
 import logo from "./assets/logo.png";
 import { socialLinks } from "./data/socialLinks.js";
 import { isSupabaseConfigured, supabase } from "./lib/supabaseClient.js";
+import { BUILTIN_TEMPLATE_CATALOG } from "./lib/cardTemplates.js";
 
 const pageLabels = {
   create: "Créer une carte",
@@ -164,9 +167,12 @@ function ProfileField({
   );
 }
 
-function CreatePage({ profile, setProfile }) {
+function CreatePage({ profile, setProfile, layout, templateCatalog }) {
   const updateProfile = (field) => (value) =>
     setProfile((current) => ({ ...current, [field]: value }));
+  const selectedColor = templateCatalog.some((template) => template.template_key === profile.color)
+    ? profile.color
+    : templateCatalog[0]?.template_key ?? "blue";
 
   return (
     <>
@@ -247,13 +253,10 @@ function CreatePage({ profile, setProfile }) {
             {/* Nouveau sélecteur de couleur */}
             <div className="profile-field">
               <span>Couleur de carte</span>
-              <select onChange={(e) => setProfile(p => ({...p, color: e.target.value}))} value={profile.color || 'blue'}>
-                <option value="blue">Bleu</option>
-                <option value="green">Vert</option>
-                <option value="orange">Orange</option>
-                <option value="violet">Violet</option>
-                <option value="yellow">Jaune</option>
-                <option value="red">Rouge</option>
+              <select onChange={(event) => setProfile((current) => ({ ...current, color: event.target.value }))} value={selectedColor}>
+                {templateCatalog.map((template) => (
+                  <option key={template.template_key} value={template.template_key}>{template.label}</option>
+                ))}
               </select>
             </div>
             {/* Option QR Code */}
@@ -285,7 +288,7 @@ function CreatePage({ profile, setProfile }) {
               02
             </span>
           </div>
-          <OtakuCard profile={profile} />
+          <OtakuCard profile={profile} layout={layout} templateCatalog={templateCatalog} />
         </section>
       </div>
     </>
@@ -567,7 +570,7 @@ function AdminUsersPanel() {
   );
 }
 
-function SuggestionsAdminPage({ membership }) {
+function SuggestionsAdminPage({ membership, onLayoutPublished, onTemplateCatalogChanged, templateCatalog }) {
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(Boolean(membership.can_read_suggestions));
   const [error, setError] = useState("");
@@ -657,6 +660,15 @@ function SuggestionsAdminPage({ membership }) {
           </div>
         )}
       </section>
+      {membership.can_edit_layout && (
+        <LayoutEditor membership={membership} onPublished={onLayoutPublished} templateCatalog={templateCatalog} />
+      )}
+      {membership.can_manage_templates && (
+        <TemplateManager
+          membership={membership}
+          onCatalogChanged={onTemplateCatalogChanged}
+        />
+      )}
       {membership.can_manage_admins && <AdminUsersPanel />}
     </>
   );
@@ -670,9 +682,50 @@ function App() {
   const [authError, setAuthError] = useState("");
   const [signingIn, setSigningIn] = useState(false);
   const [membership, setMembership] = useState(null);
+  const [publishedLayout, setPublishedLayout] = useState(null);
+  const [templateCatalog, setTemplateCatalog] = useState(BUILTIN_TEMPLATE_CATALOG);
   const user = session?.user ?? null;
   const userId = user?.id;
   const showAdmin = Boolean(membership && Object.values(membership).some(Boolean));
+
+  const loadTemplateCatalog = useCallback(async () => {
+    if (!supabase) return;
+    const { data, error } = await supabase
+      .from("card_templates")
+      .select("id, template_key, label, asset_path")
+      .eq("is_active", true)
+      .order("label");
+    if (error) {
+      console.error("Unable to load active card templates", error);
+      return;
+    }
+    setTemplateCatalog(data?.length ? data : BUILTIN_TEMPLATE_CATALOG);
+  }, []);
+
+  useEffect(() => {
+    void loadTemplateCatalog();
+  }, [loadTemplateCatalog]);
+
+  useEffect(() => {
+    if (!supabase) return undefined;
+    let active = true;
+    supabase
+      .from("layout_versions")
+      .select("layout_json")
+      .eq("state", "published")
+      .order("version", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (!active) return;
+        if (error) {
+          console.error("Unable to load the published card layout", error);
+          return;
+        }
+        if (data?.layout_json) setPublishedLayout(data.layout_json);
+      });
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     if (!supabase) return undefined;
@@ -812,7 +865,12 @@ function App() {
 
         <main className="main-content">
           {activePage === "create" && (
-            <CreatePage profile={profile} setProfile={setProfile} />
+            <CreatePage
+              layout={publishedLayout}
+              profile={profile}
+              setProfile={setProfile}
+              templateCatalog={templateCatalog}
+            />
           )}
           {activePage === "collection" && (
             <CollectionPage onCreate={() => setActivePage("create")} />
@@ -828,7 +886,12 @@ function App() {
             />
           )}
           {activePage === "admin" && showAdmin && (
-            <SuggestionsAdminPage membership={membership} />
+            <SuggestionsAdminPage
+              membership={membership}
+              onLayoutPublished={setPublishedLayout}
+              onTemplateCatalogChanged={loadTemplateCatalog}
+              templateCatalog={templateCatalog}
+            />
           )}
         </main>
       </div>

@@ -946,7 +946,7 @@ function App() {
         </div>
         <button aria-haspopup="dialog" aria-expanded={showCardIdea} aria-label="Astuce pour améliorer ta carte" className="header-idea-button" onClick={() => setShowCardIdea(true)} type="button">💡</button>
       </header>
-      {showCardIdea && <CardEnhancementIdea onClose={() => setShowCardIdea(false)} />
+      {showCardIdea && <CardEnhancementIdea onClose={() => setShowCardIdea(false)} />}
 
       <div className="app-body">
         <aside className="app-sidebar">
@@ -1003,3 +1003,4 @@ function App() {
 }
 
 export default App;
+

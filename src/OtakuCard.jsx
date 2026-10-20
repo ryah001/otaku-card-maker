@@ -109,6 +109,7 @@ export default function OtakuCard({ profile, layout: savedLayout, templateCatalo
     try {
       const { default: html2canvas } = await import("html2canvas");
       // Pour l'export, on s'assure que le rendu est fait à la taille réelle 957x536
+      if (document.fonts?.ready) await document.fonts.ready;
       const canvas = await html2canvas(cardRef.current, {
         scale: 1, // On utilise scale 1 car les dimensions 957x536 sont déjà les dimensions cibles à 300DPI
         useCORS: true,
@@ -124,6 +125,10 @@ export default function OtakuCard({ profile, layout: savedLayout, templateCatalo
             artboard.style.width = `${CARD_WIDTH}px`;
             artboard.style.height = `${CARD_HEIGHT}px`;
           }
+          // Export-only line-height adjustment to prevent text clipping.
+          clonedCard.querySelectorAll('[style*="font-size"]').forEach((element) => {
+            element.style.lineHeight = "1.1";
+          });
         },
       });
       const link = document.createElement("a");

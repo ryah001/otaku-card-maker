@@ -1093,3 +1093,95 @@ textarea:focus-visible {
   .template-restore-row { align-items: stretch; flex-direction: column; }
   .template-restore-row button { width: 100%; }
 }
+
+.header-idea-button {
+  display: inline-grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  place-items: center;
+  border: 1px solid rgba(172, 202, 229, 0.28);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffe18a;
+  font-size: 21px;
+  cursor: pointer;
+}
+.header-idea-button:hover { background: rgba(255, 255, 255, 0.12); }
+.idea-dialog-backdrop {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(2, 10, 20, 0.72);
+}
+.idea-dialog {
+  position: relative;
+  width: min(100%, 680px);
+  max-height: min(90vh, 820px);
+  overflow: auto;
+  padding: clamp(20px, 4vw, 32px);
+  border: 1px solid var(--color-line);
+  border-radius: 18px;
+  background: var(--color-panel);
+  color: var(--color-text);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+}
+.idea-dialog h2 { margin: 0 36px 10px 0; font-size: clamp(21px, 4vw, 28px); }
+.idea-dialog-intro { margin: 0 0 18px; color: var(--color-muted); line-height: 1.6; }
+.idea-dialog-steps { margin: 0 0 20px; padding-left: 22px; line-height: 1.75; }
+.idea-dialog-steps a { color: var(--color-cyan); font-weight: 700; }
+.idea-prompt {
+  max-height: 270px;
+  overflow: auto;
+  margin: 0 0 12px;
+  padding: 16px;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  background: rgba(3, 12, 24, 0.55);
+  color: var(--color-text);
+  font-size: 13px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+.idea-dialog-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.idea-copy-button, .idea-chatgpt-link {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 14px;
+  border: 1px solid var(--color-cyan);
+  border-radius: 9px;
+  background: var(--color-cyan);
+  color: #07172b;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+.idea-chatgpt-link { background: transparent; color: var(--color-cyan); }
+.idea-copy-status { min-height: 20px; margin: 10px 0 0; color: var(--color-muted); font-size: 13px; }
+.idea-dialog-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--color-line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 22px;
+  cursor: pointer;
+}
+@media (max-width: 680px) {
+  .app-header { gap: 10px; }
+  .header-community { display: none; }
+  .account-status { min-width: 0; }
+  .header-idea-button { margin-left: auto; }
+  .idea-dialog-actions { flex-direction: column; }
+  .idea-copy-button, .idea-chatgpt-link { width: 100%; }
+}

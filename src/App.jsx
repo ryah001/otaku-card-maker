@@ -92,7 +92,139 @@ function Navigation({ activePage, onNavigate, mobile = false, showAdmin = false 
 }
 
 function SocialList({ compact = false }) {
+  re]) => (
+        <button
+          aria-current={activePage === page ? "page" : undefined}
+          className={`nav-link${activePage === page ? " is-active" : ""}`}
+          key={page}
+          onClick={() => onNavigate(page)}
+          type="button"
+        >
+          {label}
+        </button>
+      ))}
+    </nav>
+  );
+}
+
+function SocialList({ compact = false }) {
   return (
+    <ul className={compact ? "social-list is-compact" : "social-list"}>
+      {socialLinks.map((network) => (
+        <li key={network.name}>
+          <a href={network.url} rel="noreferrer" target="_blank">
+            <network.icon
+              aria-hidden="true"
+              className="social-icon"
+              style={{ color: network.color }}
+            />
+            <span>{network.name}</span>
+            {network.isCommunityOnly && (
+              <span className="social-note">Communauté</span>
+            )}
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function ProfileField({
+  id,
+  label,
+  value,
+  onChange,
+  multiline = false,
+  options,
+  placeholder,
+  maxLength,
+}) {
+  if (options) {
+    return (
+      <label className="profile-field" htmlFor={id}>
+        <span>{label}</span>
+        <select
+          id={id}
+          onChange={(event) => onChange(event.target.value)}
+          value={value}
+        >
+          <option disabled value="">Choisir un genre…</option>
+          {options.map((group) => (
+            <optgroup key={group.label} label={group.label}>
+              {group.options.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+      </label>
+    );
+  }
+
+  const Control = multiline ? "textarea" : "input";
+  return (
+    <label
+      className={`profile-field${multiline ? " is-wide" : ""}`}
+      htmlFor={id}
+    >
+      <span>{label}</span>
+      <Control
+        autoComplete="off"
+        id={id}
+        maxLength={maxLength ?? (multiline ? 240 : 32)}
+        onChange={(event) => onChange(event.target.value)}
+        rows={multiline ? 2 : undefined}
+        value={value}
+        placeholder={placeholder}
+      />
+    </label>
+  );
+}
+
+function CreatePage({ profile, setProfile, layout, templateCatalog, user, authReady, memberCardNumber, memberCardLoading, memberCardError }) {
+  const updateProfile = (field) => (value) =>
+    setProfile((current) => ({ ...current, [field]: value }));
+  const selectedColor = templateCatalog.some((template) => template.template_key === profile.color)
+    ? profile.color
+    : templateCatalog[0]?.template_key ?? "blue";
+
+  return (
+    <>
+      <header className="page-heading">
+        <p className="eyebrow">Atelier de la guilde</p>
+        <h1>Crée ta carte Otaku</h1>
+        <p>
+          Personnalise ton identité, ajoute ton avatar et télécharge ta carte.
+        </p>
+      </header>
+
+      <div className="create-layout">
+        <section
+          aria-labelledby="profile-heading"
+          className="panel profile-panel"
+        >
+          <div className="panel-heading">
+            <div>
+              <h2 id="profile-heading">Ton profil</h2>
+              <p>Les modifications apparaissent directement sur la carte.</p>
+            </div>
+            <span aria-hidden="true" className="step-index">
+              01
+            </span>
+          </div>
+          <div className="profile-form">
+            <ProfileField
+              id="username"
+              label="Nom d’utilisateur"
+              placeholder="ryah"
+              onChange={updateProfile("username")}
+              value={profile.username}
+            />
+            <ProfileField
+              id="real-name"
+     turn (
     <ul className={compact ? "social-list is-compact" : "social-list"}>
       {socialLinks.map((network) => (
         <li key={network.name}>
@@ -949,7 +1081,7 @@ function App() {
       </header>
       {showCardIdea && <CardEnhancementIdea onClose={() => setShowCardIdea(false)} />}
 
-      <div className="app-body>
+      <div className="app-body">
         <aside className="app-sidebar">
           <p className="sidebar-label">Menu principal</p>
           <Navigation activePage={activePage} onNavigate={setActivePage} showAdmin={showAdmin} />
@@ -1004,3 +1136,4 @@ function App() {
 }
 
 export default App;
+

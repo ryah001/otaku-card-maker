@@ -338,6 +338,52 @@ function CollectionPage({ onCreate }) {
   );
 }
 
+const cardEnhancementPrompt = "Tu es un directeur artistique spécialisé dans les cartes de collection Otaku haut de gamme.\nÀ partir de l'image fournie, crée une version artistiquement améliorée, professionnelle, élégante, spectaculaire et harmonieuse.\nAméliore la lumière, la profondeur, la composition, les contrastes et la qualité visuelle. Adapte l'ambiance au personnage présent sur l'image.\nLe résultat doit être digne d'une carte de collection premium conçue par un graphiste professionnel.\nRespecte autant que possible le personnage, son identité visuelle, les proportions et la composition de la carte.\nÉvite les artefacts, les détails incohérents, les déformations et les éléments visuels excessifs.\nNe crée pas de nouveaux textes.";
+
+function CardEnhancementIdea({ onClose }) {
+  const [copyMessage, setCopyMessage] = useState("");
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [onClose]);
+
+  const copyPrompt = async () => {
+    try {
+      await navigator.clipboard.writeText(cardEnhancementPrompt);
+      setCopyMessage("Le prompt a été copié.");
+    } catch {
+      setCopyMessage("La copie automatique a échoué. Sélectionne le texte du prompt pour le copier.");
+    }
+  };
+
+  return (
+    <div className="idea-dialog-backdrop" onMouseDown={(event) => {
+      if (event.target === event.currentTarget) onClose();
+    }}>
+      <section aria-labelledby="card-idea-title" aria-modal="true" className="idea-dialog" role="dialog">
+        <button aria-label="Fermer" className="idea-dialog-close" onClick={onClose} type="button">×</button>
+        <p className="eyebrow">Astuce HUNTERS ANIMES</p>
+        <h2 id="card-idea-title">Tu veux booster ta carte ? La rendre encore plus stylée ?</h2>
+        <p className="idea-dialog-intro">Voici quoi faire :</p>
+        <ol className="idea-dialog-steps">
+          <li>Télécharge ta carte.</li>
+          <li>Copie le prompt ci-dessous.</li>
+          <li>Va sur <a href="https://chatgpt.com/" rel="noreferrer" target="_blank">ChatGPT</a> et envoie ta photo avec ce prompt.</li>
+        </ol>
+        <pre className="idea-prompt">{cardEnhancementPrompt}</pre>
+        <div className="idea-dialog-actions">
+          <button className="idea-copy-button" onClick={() => void copyPrompt()} type="button">Copier le prompt</button>
+          <a className="idea-chatgpt-link" href="https://chatgpt.com/" rel="noreferrer" target="_blank">Ouvrir ChatGPT</a>
+        </div>
+        <p aria-live="polite" className="idea-copy-status" role="status">{copyMessage}</p>
+      </section>
+    </div>
+  );
+}
+
 function AboutPage({
   user,
   authReady,
@@ -688,6 +734,7 @@ function SuggestionsAdminPage({ membership, onLayoutPublished, onTemplateCatalog
 
 function App() {
   const [activePage, setActivePage] = useState("create");
+  const [showCardIdea, setShowCardIdea] = useState(false);
   const [profile, setProfile] = useState(initialProfile);
   const [session, setSession] = useState(null);
   const [authReady, setAuthReady] = useState(!isSupabaseConfigured);
@@ -897,7 +944,9 @@ function App() {
           )}
           {authError && <span className="visually-hidden">{authError}</span>}
         </div>
+        <button aria-haspopup="dialog" aria-expanded={showCardIdea} aria-label="Astuce pour améliorer ta carte" className="header-idea-button" onClick={() => setShowCardIdea(true)} type="button">💡</button>
       </header>
+      {showCardIdea && <CardEnhancementIdea onClose={() => setShowCardIdea(false)} />}
 
       <div className="app-body">
         <aside className="app-sidebar">
@@ -954,3 +1003,4 @@ function App() {
 }
 
 export default App;
+

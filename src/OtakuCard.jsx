@@ -9,10 +9,16 @@ import {
   TEMPLATE_STORAGE_BUCKET,
 } from "./lib/cardTemplates";
 import { supabase } from "./lib/supabaseClient";
+import logo from "./assets/logo.png";
+import { socialLinks } from "./data/socialLinks.js";
+import { FaCheckCircle, FaLightbulb, FaQuestionCircle, FaTimes } from "react-icons/fa";
 
 const CARD_WIDTH = 957; // Basé sur 300 DPI pour 8.1cm
 const CARD_HEIGHT = 536; // Basé sur 300 DPI pour 4.54cm
 const MAX_PHOTO_SIZE = 5 * 1024 * 1024;
+const communityNetworks = ["Telegram", "Facebook", "TikTok", "Pinterest"]
+  .map((name) => socialLinks.find((network) => network.name === name))
+  .filter(Boolean);
 
 /* Helpers pour recadrer l'image en canvas -> DataURL */
 const createImage = (url) =>
@@ -74,11 +80,21 @@ export default function OtakuCard({ profile, layout: savedLayout, templateCatalo
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [photoError, setPhotoError] = useState("");
   const [downloadState, setDownloadState] = useState("idle");
+  const [showCommunityModal, setShowCommunityModal] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [previewScale, setPreviewScale] = useState(1);
 
   const layout = savedLayout ? normalizeCardLayout(savedLayout) : INITIAL_LAYOUT;
+
+  useEffect(() => {
+    if (!showCommunityModal) return undefined;
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setShowCommunityModal(false);
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [showCommunityModal]);
   const selectedTemplate = templateCatalog.find((template) => template.template_key === profile.color)
     ?? templateCatalog[0];
   const builtInKey = selectedTemplate?.asset_path?.startsWith("builtin:")
@@ -158,6 +174,7 @@ export default function OtakuCard({ profile, layout: savedLayout, templateCatalo
         if (saved?.message) setSaveMessage(saved.message);
       }
       setDownloadState("success");
+      setShowCommunityModal(true);
     } catch (err) {
       console.error("Download error:", err);
       setDownloadState("error");
@@ -542,6 +559,93 @@ export default function OtakuCard({ profile, layout: savedLayout, templateCatalo
           {photo && <span className="photo-selected-status" role="status">Photo sélectionnée ✓</span>}
         </section>,
         photoPickerTarget,
+      )}
+      {showCommunityModal && !previewOnly && (
+        <div
+          className="community-dialog-backdrop"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) setShowCommunityModal(false);
+          }}
+        >
+          <section
+            aria-labelledby="community-dialog-title"
+            aria-describedby="community-dialog-description"
+            aria-modal="true"
+            className="community-dialog"
+            role="dialog"
+          >
+            <button
+              aria-label="Fermer le message"
+              className="community-dialog-close"
+              onClick={() => setShowCommunityModal(false)}
+              type="button"
+            >
+              <FaTimes aria-hidden="true" />
+            </button>
+
+            <div className="community-brand">
+              <img src={logo} alt="Logo HUNTERS ANIMES" />
+              <div>
+                <strong>HUNTERS ANIMES</strong>
+                <span>La chasse est ouverte</span>
+              </div>
+            </div>
+
+            <div className="community-success-icon" aria-hidden="true">
+              <FaCheckCircle />
+            </div>
+            <h2 id="community-dialog-title">Ta carte Otaku est prête !</h2>
+            <p className="community-dialog-description" id="community-dialog-description">
+              Merci d'avoir utilisé Otaku Card Maker !
+            </p>
+            <p className="community-dialog-intro">
+              Tu veux découvrir les prochaines nouveautés, profiter des améliorations et rester au courant de nos projets ? Rejoins la communauté HUNTERS ANIMES sur nos réseaux sociaux !
+            </p>
+
+            <div className="community-social-grid" aria-label="Réseaux sociaux officiels HUNTERS ANIMES">
+              {communityNetworks.map((network) => (
+                <a
+                  className="community-social-link"
+                  href={network.url}
+                  key={network.name}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  <network.icon aria-hidden="true" style={{ color: network.color }} />
+                  <span>{network.name}</span>
+                </a>
+              ))}
+            </div>
+
+            <div className="community-info-card">
+              <FaLightbulb aria-hidden="true" className="community-info-icon is-tip" />
+              <p>
+                <strong>Découvre une astuce</strong>
+                <span>Clique sur le bouton en forme d’ampoule en haut à droite pour découvrir une astuce.</span>
+              </p>
+            </div>
+            <div className="community-info-card">
+              <FaQuestionCircle aria-hidden="true" className="community-info-icon is-question" />
+              <p>
+                <strong>Une suggestion ou une idée d’amélioration ?</strong>
+                <span>Clique sur « À propos » pour nous la partager !</span>
+              </p>
+            </div>
+
+            <p className="community-thanks">Merci de soutenir HUNTERS ANIMES.</p>
+            <div className="community-dialog-footer">
+              <strong>HUNTERS ANIMES</strong>
+              <span>La chasse est ouverte !</span>
+            </div>
+            <button
+              className="community-continue-button"
+              onClick={() => setShowCommunityModal(false)}
+              type="button"
+            >
+              Continuer
+            </button>
+          </section>
+        </div>
       )}
     </div>
   );

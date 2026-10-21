@@ -117,17 +117,21 @@ export default function OtakuCard({ profile, layout: savedLayout, templateCatalo
         width: CARD_WIDTH,
         height: CARD_HEIGHT,
         onclone: (_, clonedCard) => {
+          // html2canvas passes the card element itself as clonedCard (not its parent).
           clonedCard.style.transform = "none";
-          // Forcer les dimensions sur le clone pour html2canvas
-          const artboard = clonedCard.querySelector('.card-artboard');
-          if (artboard) {
-            artboard.style.transform = "none";
-            artboard.style.width = `${CARD_WIDTH}px`;
-            artboard.style.height = `${CARD_HEIGHT}px`;
-          }
-          // Export-only line-height adjustment to prevent text clipping.
+          clonedCard.style.width = `${CARD_WIDTH}px`;
+          clonedCard.style.height = `${CARD_HEIGHT}px`;
+          clonedCard.style.overflow = "hidden";
+          // Remove the vertical compression used only for the on-screen preview.
+          clonedCard.querySelectorAll('[style*="scaleY"]').forEach((element) => {
+            element.style.setProperty("transform", "none", "important");
+          });
+          // Keep text boxes from clipping glyphs during rasterization.
           clonedCard.querySelectorAll('[style*="font-size"]').forEach((element) => {
-            element.style.lineHeight = "1.1";
+            element.style.setProperty("line-height", "1.2", "important");
+            element.style.setProperty("height", "auto", "important");
+            element.style.setProperty("overflow", "visible", "important");
+            element.style.setProperty("padding-top", "2px", "important");
           });
         },
       });

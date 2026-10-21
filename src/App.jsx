@@ -308,7 +308,15 @@ function CreatePage({ profile, setProfile, layout, templateCatalog, user, authRe
   );
 }
 
-function CollectionPage({ cards, loading, error, user, onCreate, onSignIn }) {
+function formatCardDate(value) {
+  return new Date(value).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
+}
+
+function getCardExpirationDate(createdAt) {
+  return new Date(new Date(createdAt).getTime() + 30 * 24 * 60 * 60 * 1000);
+}
+
+function CollectionPage({ cards, loading, error, user, onCreate, onSignIn, onDeleteCard, deletingCardId, actionMessage }) {
   return (
     <>
       <header className="page-heading">
@@ -335,19 +343,32 @@ function CollectionPage({ cards, loading, error, user, onCreate, onSignIn }) {
           <button className="button-primary" onClick={onCreate} type="button">Créer une carte</button>
         </section>
       ) : (
-        <section className="history-grid" aria-label="Historique de tes cartes">
-          {cards.map((card) => (
-            <article className="panel history-card" key={card.id}>
-              {card.imageUrl ? <img className="history-card-image" src={card.imageUrl} alt={`Carte Otaku de ${card.title}`} loading="lazy" /> : <div className="history-card-image history-card-image-empty">Aperçu indisponible</div>}
-              <div className="history-card-details">
-                <h2>{card.title}</h2>
-                <time dateTime={card.created_at}>Créée le {new Date(card.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}</time>
-                {card.profile_data?.genre && <p>{card.profile_data.genre}</p>}
-                {card.imageUrl && <a className="button-primary history-download" href={card.imageUrl} download={`carte-otaku-${(card.title || "collection").replace(/[^a-z0-9_-]/gi, "-")}.png`}>Télécharger la carte</a>}
-              </div>
-            </article>
-          ))}
-        </section>
+        <>
+          {actionMessage && <p className={`form-message ${actionMessage.type === "error" ? "is-error" : "is-success"}`} role="status">{actionMessage.text}</p>}
+          <section className="history-grid" aria-label="Historique de tes cartes">
+            {cards.map((card) => {
+              const expiresAt = getCardExpirationDate(card.created_at);
+              const isDeleting = deletingCardId === card.id;
+              return (
+                <article className="panel history-card" key={card.id}>
+                  {card.imageUrl ? <img className="history-card-image" src={card.imageUrl} alt={`Carte Otaku de ${card.title}`} loading="lazy" /> : <div className="history-card-image history-card-image-empty">Aperçu indisponible</div>}
+                  <div className="history-card-details">
+                    <h2>{card.title}</h2>
+                    <time dateTime={card.created_at}>Créée le {formatCardDate(card.created_at)}</time>
+                    <p className="history-expiration">Expire le {formatCardDate(expiresAt.toISOString())} <span>(conservation de 30 jours)</span></p>
+                    {card.profile_data?.genre && <p>{card.profile_data.genre}</p>}
+                    <div className="history-actions">
+                      {card.imageUrl && <a className="button-primary history-download" href={card.imageUrl} download={`carte-otaku-${(card.title || "collection").replace(/[^a-z0-9_-]/gi, "-")}.png`}>Télécharger la carte</a>}
+                      <button className="history-delete-button" type="button" onClick={() => onDeleteCard(card)} disabled={isDeleting}>
+                        {isDeleting ? "Suppression…" : "Supprimer"}
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </section>
+        </>
       )}
     </>
   );
@@ -764,6 +785,8 @@ function App() {
   const [cardHistory, setCardHistory] = useState([]);
   const [cardHistoryLoading, setCardHistoryLoading] = useState(false);
   const [cardHistoryError, setCardHistoryError] = useState("");
+  const [deletingCardId, setDeletingCardId] = useState(null);
+  const [cardHistoryActionMessage, setCardHistoryActionMessage] = useState(null);
   const user = session?.user ?? null;
   const userId = user?.id;
   const showAdmin = Boolean(membership && Object.values(membership).some(Boolean));
@@ -802,6 +825,37 @@ function App() {
     const urlByPath = new Map((signedUrls ?? []).map((item) => [item.path, item.signedUrl]));
     setCardHistory(rows.map((row) => ({ ...row, imageUrl: urlByPath.get(row.image_path) ?? null })));
     setCardHistoryLoading(false);
+  }, [userId]);
+
+  const deleteCardFromHistory = useCallback(async (card) => {
+    if (!supabase || !userId || !card?.id || !card?.image_path) return;
+    const confirmed = window.confirm(`Supprimer définitivement « ${card.title || "Carte Otaku"} » de Mes cartes ? Cette action est irréversible.`);
+    if (!confirmed) return;
+
+    setDeletingCardId(card.id);
+    setCardHistoryActionMessage(null);
+    const { error: deleteError } = await supabase
+      .from("card_history")
+      .delete()
+      .eq("id", card.id)
+      .eq("user_id", userId);
+
+    if (deleteError) {
+      console.error("Unable to delete card history record", deleteError);
+      setCardHistoryActionMessage({ type: "error", text: "La carte n’a pas pu être supprimée. Réessaie dans un instant." });
+      setDeletingCardId(null);
+      return;
+    }
+
+    setCardHistory((current) => current.filter((item) => item.id !== card.id));
+    const { error: storageError } = await supabase.storage.from("card-history").remove([card.image_path]);
+    if (storageError) {
+      console.error("Card history record deleted, but image cleanup failed", storageError);
+      setCardHistoryActionMessage({ type: "error", text: "La carte a été retirée de ton historique, mais son image n’a pas pu être supprimée du stockage. Réessaie plus tard." });
+    } else {
+      setCardHistoryActionMessage({ type: "success", text: "Carte supprimée de ton historique et de son stockage." });
+    }
+    setDeletingCardId(null);
   }, [userId]);
 
   const saveCardToHistory = useCallback(async ({ blob, profile: cardProfile, layout: cardLayout, templateKey }) => {
@@ -1070,6 +1124,9 @@ function App() {
               user={user}
               onCreate={() => setActivePage("create")}
               onSignIn={signInWithGoogle}
+              onDeleteCard={deleteCardFromHistory}
+              deletingCardId={deletingCardId}
+              actionMessage={cardHistoryActionMessage}
             />
           )}
           {activePage === "about" && (

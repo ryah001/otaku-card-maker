@@ -1197,3 +1197,13 @@ textarea:focus-visible {
 .history-card-details h2 { margin: 0; overflow-wrap: anywhere; }
 .history-card-details time, .history-card-details p { color: var(--muted, #a8b4c7); font-size: 0.9rem; margin: 0; }
 .history-download { display: inline-flex; justify-content: center; align-items: center; text-decoration: none; margin-top: 0.25rem; }
+
+
+.history-expiration { color: #e2b75b !important; }
+.history-expiration span { color: var(--color-muted); font-size: 0.82em; }
+.history-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.55rem; margin-top: 0.35rem; }
+.history-actions .history-download { margin-top: 0; }
+.history-delete-button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 14px; border: 1px solid #713c48; border-radius: 6px; background: #2a1520; color: #ffc4cd; cursor: pointer; font-size: 14px; font-weight: 650; line-height: 1.25; }
+.history-delete-button:hover:not(:disabled) { background: #401b29; border-color: #b85b6c; }
+.history-delete-button:disabled { opacity: 0.6; cursor: wait; }
+@media (max-width: 520px) { .history-actions { display: grid; grid-template-columns: 1fr; } .history-actions > a, .history-actions > button { width: 100%; } }

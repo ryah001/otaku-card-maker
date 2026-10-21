@@ -1186,3 +1186,14 @@ textarea:focus-visible {
   .idea-dialog-actions { flex-direction: column; }
   .idea-copy-button, .idea-chatgpt-link { width: 100%; }
 }
+
+
+/* Historique privé des cartes Otaku */
+.history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 1.1rem; align-items: start; }
+.history-card { padding: 1rem; min-width: 0; overflow: hidden; }
+.history-card-image { display: block; width: 100%; height: auto; aspect-ratio: 957 / 536; object-fit: contain; border-radius: 0.75rem; background: #080e16; }
+.history-card-image-empty { display: grid; place-items: center; color: #a8b4c7; font-size: 0.9rem; }
+.history-card-details { display: grid; gap: 0.55rem; padding-top: 0.9rem; }
+.history-card-details h2 { margin: 0; overflow-wrap: anywhere; }
+.history-card-details time, .history-card-details p { color: var(--muted, #a8b4c7); font-size: 0.9rem; margin: 0; }
+.history-download { display: inline-flex; justify-content: center; align-items: center; text-decoration: none; margin-top: 0.25rem; }

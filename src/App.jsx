@@ -167,7 +167,7 @@ function ProfileField({
   );
 }
 
-function CreatePage({ profile, setProfile, layout, templateCatalog, user, authReady, memberCardNumber, memberCardLoading, memberCardError }) {
+function CreatePage({ profile, setProfile, layout, templateCatalog, user, authReady, memberCardNumber, memberCardLoading, memberCardError, onSaveCard }) {
   const updateProfile = (field) => (value) =>
     setProfile((current) => ({ ...current, [field]: value }));
   const selectedColor = templateCatalog.some((template) => template.template_key === profile.color)
@@ -300,6 +300,7 @@ function CreatePage({ profile, setProfile, layout, templateCatalog, user, authRe
             profile={{ ...profile, cardNumber: memberCardNumber }}
             layout={layout}
             templateCatalog={templateCatalog}
+            onSaveCard={user ? onSaveCard : undefined}
           />
         </section>
       </div>
@@ -307,33 +308,47 @@ function CreatePage({ profile, setProfile, layout, templateCatalog, user, authRe
   );
 }
 
-function CollectionPage({ onCreate }) {
+function CollectionPage({ cards, loading, error, user, onCreate, onSignIn }) {
   return (
     <>
       <header className="page-heading">
         <p className="eyebrow">Collection personnelle</p>
         <h1>Mes cartes</h1>
-        <p>
-          Tes créations apparaîtront ici après la mise en place de ton espace
-          personnel.
-        </p>
+        <p>Retrouve ici les cartes que tu as téléchargées depuis ton compte.</p>
       </header>
-      <section
-        aria-labelledby="collection-empty-heading"
-        className="panel empty-state"
-      >
-        <span aria-hidden="true" className="empty-mark">
-          HA
-        </span>
-        <h2 id="collection-empty-heading">Ta collection commence ici</h2>
-        <p>
-          Les cartes du générateur actuel ne sont pas encore enregistrées en
-          ligne.
-        </p>
-        <button className="button-primary" onClick={onCreate} type="button">
-          Créer une carte
-        </button>
-      </section>
+      {!user ? (
+        <section className="panel empty-state">
+          <span aria-hidden="true" className="empty-mark">HA</span>
+          <h2>Connecte-toi pour retrouver tes cartes</h2>
+          <p>Chaque compte Google possède sa propre collection privée.</p>
+          <button className="button-primary" onClick={onSignIn} type="button">Se connecter avec Google</button>
+        </section>
+      ) : loading ? (
+        <section className="panel empty-state" role="status"><p>Chargement de ta collection…</p></section>
+      ) : error ? (
+        <section className="panel empty-state"><h2>Impossible de charger tes cartes</h2><p className="form-message is-error" role="alert">{error}</p></section>
+      ) : cards.length === 0 ? (
+        <section className="panel empty-state">
+          <span aria-hidden="true" className="empty-mark">HA</span>
+          <h2>Ta collection commence ici</h2>
+          <p>Les prochaines cartes seront enregistrées automatiquement lorsque tu les téléchargeras en étant connecté.</p>
+          <button className="button-primary" onClick={onCreate} type="button">Créer une carte</button>
+        </section>
+      ) : (
+        <section className="history-grid" aria-label="Historique de tes cartes">
+          {cards.map((card) => (
+            <article className="panel history-card" key={card.id}>
+              {card.imageUrl ? <img className="history-card-image" src={card.imageUrl} alt={`Carte Otaku de ${card.title}`} loading="lazy" /> : <div className="history-card-image history-card-image-empty">Aperçu indisponible</div>}
+              <div className="history-card-details">
+                <h2>{card.title}</h2>
+                <time dateTime={card.created_at}>Créée le {new Date(card.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}</time>
+                {card.profile_data?.genre && <p>{card.profile_data.genre}</p>}
+                {card.imageUrl && <a className="button-primary history-download" href={card.imageUrl} download={`carte-otaku-${(card.title || "collection").replace(/[^a-z0-9_-]/gi, "-")}.png`}>Télécharger la carte</a>}
+              </div>
+            </article>
+          ))}
+        </section>
+      )}
     </>
   );
 }
@@ -746,9 +761,78 @@ function App() {
   const [memberCardNumber, setMemberCardNumber] = useState("");
   const [memberCardLoading, setMemberCardLoading] = useState(false);
   const [memberCardError, setMemberCardError] = useState("");
+  const [cardHistory, setCardHistory] = useState([]);
+  const [cardHistoryLoading, setCardHistoryLoading] = useState(false);
+  const [cardHistoryError, setCardHistoryError] = useState("");
   const user = session?.user ?? null;
   const userId = user?.id;
   const showAdmin = Boolean(membership && Object.values(membership).some(Boolean));
+
+  const loadCardHistory = useCallback(async () => {
+    if (!supabase || !userId) {
+      setCardHistory([]);
+      setCardHistoryLoading(false);
+      setCardHistoryError("");
+      return;
+    }
+    setCardHistoryLoading(true);
+    setCardHistoryError("");
+    const { data, error } = await supabase
+      .from("card_history")
+      .select("id, title, profile_data, image_path, created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) {
+      console.error("Unable to load card history", error);
+      setCardHistoryError("La collection n’a pas pu être chargée. Réessaie dans un instant.");
+      setCardHistoryLoading(false);
+      return;
+    }
+    const rows = data ?? [];
+    if (!rows.length) {
+      setCardHistory([]);
+      setCardHistoryLoading(false);
+      return;
+    }
+    const { data: signedUrls, error: urlError } = await supabase.storage
+      .from("card-history")
+      .createSignedUrls(rows.map((row) => row.image_path), 3600);
+    if (urlError) console.error("Unable to sign card history images", urlError);
+    const urlByPath = new Map((signedUrls ?? []).map((item) => [item.path, item.signedUrl]));
+    setCardHistory(rows.map((row) => ({ ...row, imageUrl: urlByPath.get(row.image_path) ?? null })));
+    setCardHistoryLoading(false);
+  }, [userId]);
+
+  const saveCardToHistory = useCallback(async ({ blob, profile: cardProfile, layout: cardLayout, templateKey }) => {
+    if (!supabase || !userId || !(blob instanceof Blob)) {
+      return { ok: false, message: "Connecte-toi avec Google pour enregistrer cette carte dans Mes cartes." };
+    }
+    const path = `${userId}/${crypto.randomUUID()}.png`;
+    const { error: uploadError } = await supabase.storage
+      .from("card-history")
+      .upload(path, blob, { contentType: "image/png", upsert: false });
+    if (uploadError) {
+      console.error("Card history image upload failed", uploadError);
+      return { ok: false, message: "La carte a été téléchargée, mais son enregistrement dans Mes cartes a échoué." };
+    }
+    const title = String(cardProfile?.username || cardProfile?.realName || "Carte Otaku").trim().slice(0, 120) || "Carte Otaku";
+    const profileData = { ...cardProfile, templateKey: templateKey || cardProfile?.color || "blue" };
+    const { error: insertError } = await supabase.from("card_history").insert({
+      user_id: userId,
+      title,
+      profile_data: profileData,
+      layout_data: cardLayout ?? null,
+      image_path: path,
+    });
+    if (insertError) {
+      console.error("Card history record insert failed", insertError);
+      await supabase.storage.from("card-history").remove([path]);
+      return { ok: false, message: "La carte a été téléchargée, mais son enregistrement dans Mes cartes a échoué." };
+    }
+    await loadCardHistory();
+    return { ok: true, message: "Carte enregistrée dans Mes cartes." };
+  }, [userId, loadCardHistory]);
 
   const loadTemplateCatalog = useCallback(async () => {
     if (!supabase) return;
@@ -767,6 +851,10 @@ function App() {
   useEffect(() => {
     void loadTemplateCatalog();
   }, [loadTemplateCatalog]);
+
+  useEffect(() => {
+    void loadCardHistory();
+  }, [loadCardHistory]);
 
   useEffect(() => {
     if (!supabase) return undefined;
@@ -971,10 +1059,18 @@ function App() {
               memberCardNumber={memberCardNumber}
               memberCardLoading={memberCardLoading}
               memberCardError={memberCardError}
+              onSaveCard={saveCardToHistory}
             />
           )}
           {activePage === "collection" && (
-            <CollectionPage onCreate={() => setActivePage("create")} />
+            <CollectionPage
+              cards={cardHistory}
+              loading={cardHistoryLoading}
+              error={cardHistoryError}
+              user={user}
+              onCreate={() => setActivePage("create")}
+              onSignIn={signInWithGoogle}
+            />
           )}
           {activePage === "about" && (
             <AboutPage

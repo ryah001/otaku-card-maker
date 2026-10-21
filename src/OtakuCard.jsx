@@ -58,7 +58,7 @@ function quoteFontSize(text, width) {
   return 4;
 }
 
-export default function OtakuCard({ profile, layout: savedLayout, templateCatalog = BUILTIN_TEMPLATE_CATALOG, previewOnly = false }) {
+export default function OtakuCard({ profile, layout: savedLayout, templateCatalog = BUILTIN_TEMPLATE_CATALOG, previewOnly = false, onSaveCard }) {
   const cardRef = useRef(null);
   const fileInputRef = useRef(null);
   const stageRef = useRef(null);
@@ -74,6 +74,7 @@ export default function OtakuCard({ profile, layout: savedLayout, templateCatalo
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [photoError, setPhotoError] = useState("");
   const [downloadState, setDownloadState] = useState("idle");
+  const [saveMessage, setSaveMessage] = useState("");
   const [previewScale, setPreviewScale] = useState(1);
 
   const layout = savedLayout ? normalizeCardLayout(savedLayout) : INITIAL_LAYOUT;
@@ -135,10 +136,19 @@ export default function OtakuCard({ profile, layout: savedLayout, templateCatalo
           });
         },
       });
+      const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob((value) => value ? resolve(value) : reject(new Error("Impossible de préparer l’image")), "image/png");
+      });
       const link = document.createElement("a");
       link.download = `carte-otaku-${profile.username || 'member'}.png`;
-      link.href = canvas.toDataURL("image/png");
+      link.href = URL.createObjectURL(blob);
       link.click();
+      window.setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+      setSaveMessage("");
+      if (onSaveCard) {
+        const saved = await onSaveCard({ blob, profile, layout, templateKey: selectedTemplate?.template_key });
+        if (saved?.message) setSaveMessage(saved.message);
+      }
       setDownloadState("success");
     } catch (err) {
       console.error("Download error:", err);
@@ -481,6 +491,7 @@ export default function OtakuCard({ profile, layout: savedLayout, templateCatalo
       >
         {downloadState === "loading" ? "Préparation…" : "Télécharger ma carte"}
       </button>}
+      {saveMessage && <p className="form-message" role="status">{saveMessage}</p>}
       {!previewOnly && downloadState === "success" && (
         <p className="form-message is-success" role="status">
           Ta carte a été téléchargée.

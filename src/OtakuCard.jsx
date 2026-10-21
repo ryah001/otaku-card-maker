@@ -58,7 +58,7 @@ function quoteFontSize(text, width) {
   return 4;
 }
 
-export default function OtakuCard({ profile, layout: savedLayout, templateCatalog = BUILTIN_TEMPLATE_CATALOG, previewOnly = false, onSaveCard }) {
+export default function OtakuCard({ profile, layout: savedLayout, templateCatalog = BUILTIN_TEMPLATE_CATALOG, previewOnly = false, onSaveCard, isGoogleAuthenticated = false, onSignIn }) {
   const cardRef = useRef(null);
   const fileInputRef = useRef(null);
   const stageRef = useRef(null);
@@ -75,6 +75,7 @@ export default function OtakuCard({ profile, layout: savedLayout, templateCatalo
   const [photoError, setPhotoError] = useState("");
   const [downloadState, setDownloadState] = useState("idle");
   const [saveMessage, setSaveMessage] = useState("");
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [previewScale, setPreviewScale] = useState(1);
 
   const layout = savedLayout ? normalizeCardLayout(savedLayout) : INITIAL_LAYOUT;
@@ -105,7 +106,14 @@ export default function OtakuCard({ profile, layout: savedLayout, templateCatalo
   }, []);
 
   const handleDownload = async () => {
-    if (!cardRef.current || downloadState === "loading") return;
+    if (downloadState === "loading") return;
+    if (!isGoogleAuthenticated) {
+      setSaveMessage("Connecte-toi avec ton compte Google pour continuer. La création et le téléchargement de cartes sont réservés aux membres connectés.");
+      setShowAuthPrompt(true);
+      return;
+    }
+    setShowAuthPrompt(false);
+    if (!cardRef.current) return;
     setDownloadState("loading");
     try {
       const { default: html2canvas } = await import("html2canvas");
@@ -491,7 +499,14 @@ export default function OtakuCard({ profile, layout: savedLayout, templateCatalo
       >
         {downloadState === "loading" ? "Préparation…" : "Télécharger ma carte"}
       </button>}
-      {saveMessage && <p className="form-message" role="status">{saveMessage}</p>}
+      {saveMessage && <p className={`form-message${showAuthPrompt ? " is-error" : ""}`} role="status">{saveMessage}</p>}
+      {!previewOnly && showAuthPrompt && !isGoogleAuthenticated && (
+        <div className="auth-required-prompt">
+          <button className="button-primary" disabled={!onSignIn} onClick={() => void onSignIn?.()} type="button">
+            Se connecter avec Google pour continuer
+          </button>
+        </div>
+      )}
       {!previewOnly && downloadState === "success" && (
         <p className="form-message is-success" role="status">
           Ta carte a été téléchargée.

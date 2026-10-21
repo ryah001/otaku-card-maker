@@ -167,7 +167,7 @@ function ProfileField({
   );
 }
 
-function CreatePage({ profile, setProfile, layout, templateCatalog, user, authReady, memberCardNumber, memberCardLoading, memberCardError, onSaveCard }) {
+function CreatePage({ profile, setProfile, layout, templateCatalog, user, isGoogleAuthenticated, onSignIn, authReady, memberCardNumber, memberCardLoading, memberCardError, onSaveCard }) {
   const updateProfile = (field) => (value) =>
     setProfile((current) => ({ ...current, [field]: value }));
   const selectedColor = templateCatalog.some((template) => template.template_key === profile.color)
@@ -300,7 +300,9 @@ function CreatePage({ profile, setProfile, layout, templateCatalog, user, authRe
             profile={{ ...profile, cardNumber: memberCardNumber }}
             layout={layout}
             templateCatalog={templateCatalog}
-            onSaveCard={user ? onSaveCard : undefined}
+            isGoogleAuthenticated={isGoogleAuthenticated}
+            onSignIn={onSignIn}
+            onSaveCard={isGoogleAuthenticated ? onSaveCard : undefined}
           />
         </section>
       </div>
@@ -788,6 +790,10 @@ function App() {
   const [deletingCardId, setDeletingCardId] = useState(null);
   const [cardHistoryActionMessage, setCardHistoryActionMessage] = useState(null);
   const user = session?.user ?? null;
+  const isGoogleAuthenticated = Boolean(user && (
+    user.app_metadata?.provider === "google" ||
+    user.identities?.some((identity) => identity.provider === "google")
+  ));
   const userId = user?.id;
   const showAdmin = Boolean(membership && Object.values(membership).some(Boolean));
 
@@ -859,7 +865,7 @@ function App() {
   }, [userId]);
 
   const saveCardToHistory = useCallback(async ({ blob, profile: cardProfile, layout: cardLayout, templateKey }) => {
-    if (!supabase || !userId || !(blob instanceof Blob)) {
+    if (!supabase || !isGoogleAuthenticated || !userId || !(blob instanceof Blob)) {
       return { ok: false, message: "Connecte-toi avec Google pour enregistrer cette carte dans Mes cartes." };
     }
     const path = `${userId}/${crypto.randomUUID()}.png`;
@@ -886,7 +892,7 @@ function App() {
     }
     await loadCardHistory();
     return { ok: true, message: "Carte enregistrée dans Mes cartes." };
-  }, [userId, loadCardHistory]);
+  }, [isGoogleAuthenticated, userId, loadCardHistory]);
 
   const loadTemplateCatalog = useCallback(async () => {
     if (!supabase) return;
@@ -1109,6 +1115,8 @@ function App() {
               setProfile={setProfile}
               templateCatalog={templateCatalog}
               user={user}
+              isGoogleAuthenticated={isGoogleAuthenticated}
+              onSignIn={signInWithGoogle}
               authReady={authReady}
               memberCardNumber={memberCardNumber}
               memberCardLoading={memberCardLoading}

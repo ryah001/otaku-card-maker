@@ -489,6 +489,10 @@ textarea:focus-visible {
 .form-message.is-error {
   color: #ff9c9c;
 }
+.auth-required-prompt {
+  margin-top: 0.75rem;
+}
+
 .form-message.is-success {
   color: var(--color-green);
 }

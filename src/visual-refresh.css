@@ -1,0 +1,66 @@
+/* Otaku Card Maker — Ocean Blue visual refresh */
+:root {
+  color-scheme: dark;
+  --ocm-navy: #03045e;
+  --ocm-ocean: #0277b6;
+  --ocm-cyan: #48cbe4;
+  --ocm-ice: #cbf0f8;
+  --ocm-bg: #061522;
+  --ocm-surface: #0b1e2d;
+  --ocm-surface-raised: #10283a;
+  --ocm-border: rgba(203, 240, 248, .14);
+  --ocm-text: #f4fbff;
+  --ocm-muted: #a9c1ce;
+  --ocm-gradient: linear-gradient(105deg, #03045e 0%, #0277b6 45%, #48cbe4 78%, #cbf0f8 100%);
+  --ocm-ease: cubic-bezier(.22, 1, .36, 1);
+}
+html { scroll-behavior: smooth; }
+body {
+  background-color: var(--ocm-bg);
+  color: var(--ocm-text);
+  -webkit-font-smoothing: antialiased;
+}
+button, a, input, select, textarea, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+button, a, input, select, textarea {
+  transition: color .2s var(--ocm-ease), background-color .2s var(--ocm-ease),
+    border-color .2s var(--ocm-ease), box-shadow .2s var(--ocm-ease),
+    transform .22s var(--ocm-ease), opacity .2s ease;
+}
+button { cursor: pointer; }
+button:focus-visible, a:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--ocm-cyan);
+  outline-offset: 3px;
+}
+::selection { background: rgba(72, 203, 228, .28); color: #fff; }
+/* Subtle Ocean Blue accents on common interactive controls */
+button:hover:not(:disabled) { border-color: rgba(72, 203, 228, .55); }
+button:active:not(:disabled) { transform: translateY(1px) scale(.99); }
+input, select, textarea {
+  accent-color: var(--ocm-cyan);
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--ocm-cyan) !important;
+  box-shadow: 0 0 0 3px rgba(72, 203, 228, .12);
+}
+/* Smooth page/content entrance without changing card artwork or card colors */
+@keyframes ocm-page-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+main, [role="main"] {
+  animation: ocm-page-enter .38s var(--ocm-ease) both;
+}
+dialog, [role="dialog"] {
+  animation: ocm-page-enter .24s var(--ocm-ease) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

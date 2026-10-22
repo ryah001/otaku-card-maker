@@ -1362,3 +1362,21 @@ textarea:focus-visible {
  .admin-inbox-pagination>div{justify-content:space-between}.admin-inbox-heading .button-secondary{width:100%}
 }
 @media(max-width:420px){.admin-inbox{padding:12px}.admin-inbox-stats>div{padding:10px}.admin-inbox-stats strong{font-size:20px}.admin-inbox-row{padding:12px}.admin-message-backdrop{padding:8px}.admin-message-dialog{padding:18px 14px}}
+
+
+/* Administration : les outils sont accessibles depuis des cartes dédiées. */
+.admin-tools-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:16px;align-items:stretch}
+.admin-tool-card{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-width:0;padding:22px}
+.admin-tool-icon{display:grid;place-items:center;width:42px;height:42px;border:1px solid var(--color-line);border-radius:12px;background:#08182c;color:var(--color-cyan);font-size:21px}
+.admin-tool-card .eyebrow{margin:2px 0 0}
+.admin-tool-card h2{margin:0;font-size:19px;line-height:1.35}
+.admin-tool-card>p:not(.eyebrow){flex:1;margin:0;color:var(--color-muted);font-size:13px;line-height:1.6}
+.admin-tool-card .admin-inbox-summary{margin-top:4px}
+.admin-tool-card>button{width:100%;margin-top:6px}
+.admin-tool-page{display:grid;gap:18px;padding:clamp(14px,2.5vw,24px)}
+.admin-tool-page-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:16px;border-bottom:1px solid var(--color-line)}
+.admin-tool-page-heading h2{margin:0;font-size:22px}
+.admin-tool-page-heading .button-secondary{flex:0 0 auto}
+.admin-inbox-body{display:grid;gap:20px}
+.admin-inbox>.admin-inbox-heading{margin-bottom:0}
+@media(max-width:600px){.admin-tool-card{padding:17px}.admin-tool-page-heading{align-items:stretch;flex-direction:column}.admin-tool-page-heading .button-secondary{width:100%}}

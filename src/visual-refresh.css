@@ -64,3 +64,159 @@ dialog, [role="dialog"] {
     transition-duration: .01ms !important;
   }
 }
+
+
+/* Component polish: Ocean Blue, clean and professional */
+:root {
+  --color-bg: #061522;
+  --color-panel: #0b1e2d;
+  --color-panel-soft: #10283a;
+  --color-line: rgba(203, 240, 248, .16);
+  --color-text: #f4fbff;
+  --color-muted: #a9c1ce;
+  --color-subtle: #7895a5;
+  --color-blue: #0277b6;
+  --color-cyan: #48cbe4;
+  --color-green: #48cbe4;
+}
+.app-header, .app-sidebar {
+  border-color: var(--color-line);
+  background: #061522;
+}
+.app-header { background: rgba(6, 21, 34, .96); backdrop-filter: blur(14px); }
+.app-sidebar { background: #071925; }
+.nav-link { border-radius: 9px; }
+.nav-link.is-active {
+  border-color: rgba(72, 203, 228, .48);
+  background: var(--ocm-gradient);
+  box-shadow: 0 5px 16px rgba(2, 119, 182, .15);
+}
+.panel {
+  border-color: var(--color-line);
+  border-radius: 12px;
+  background: linear-gradient(155deg, #10283a, #0a1d2b);
+  box-shadow: 0 10px 28px rgba(0, 8, 18, .12);
+}
+.button-primary {
+  border-color: #0277b6;
+  background: var(--ocm-gradient);
+  background-size: 160% 100%;
+  color: #041522;
+  box-shadow: 0 4px 14px rgba(2, 119, 182, .15);
+}
+.button-primary:hover:not(:disabled) {
+  background-position: 100% 0;
+  color: #03121d;
+  box-shadow: 0 6px 18px rgba(72, 203, 228, .18);
+}
+.button-secondary, .account-button {
+  border-color: var(--color-line);
+  border-radius: 8px;
+  background: #0a2030;
+}
+.profile-field input, .profile-field textarea, .profile-field select,
+.idea-form input, .idea-form textarea, .idea-form select,
+.admin-grant-form input[type="email"] {
+  border-color: var(--color-line);
+  border-radius: 8px;
+  background: #071925;
+}
+.eyebrow { color: var(--ocm-cyan); }
+.page-heading h1 { letter-spacing: -.025em; }
+.main-content > * {
+  animation: ocm-page-enter .32s var(--ocm-ease) both;
+}
+.main-content > *:nth-child(2) { animation-delay: .035s; }
+
+/* Mes cartes: refine the gallery without touching the card artwork */
+.history-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr));
+  gap: 18px;
+}
+.history-card {
+  padding: 13px;
+  border-radius: 13px;
+  background: linear-gradient(160deg, #10283a, #091b29);
+  transition: border-color .22s var(--ocm-ease), transform .22s var(--ocm-ease),
+    box-shadow .22s var(--ocm-ease);
+}
+.history-card:hover {
+  border-color: rgba(72, 203, 228, .38);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(0, 8, 18, .2);
+}
+.history-card-image { border-radius: 8px; }
+.history-card-details { gap: 9px; padding: 14px 3px 3px; }
+.history-card-details h2 { font-size: 16px; line-height: 1.4; }
+.history-card-details time, .history-card-details p { font-size: 12px; line-height: 1.5; }
+.history-expiration {
+  padding: 8px 10px;
+  border: 1px solid rgba(72, 203, 228, .17);
+  border-radius: 8px;
+  background: rgba(3, 4, 94, .18);
+  color: var(--ocm-ice) !important;
+}
+.history-expiration span { display: block; margin-top: 2px; }
+.history-actions { gap: 8px; }
+.history-actions .button-primary, .history-actions .history-delete-button {
+  min-height: 42px;
+  border-radius: 8px;
+}
+.history-delete-button {
+  border-color: rgba(203, 240, 248, .2);
+  border-radius: 8px;
+  background: rgba(6, 21, 34, .8);
+  color: #d5e8ef;
+}
+.history-delete-button:hover:not(:disabled) {
+  border-color: rgba(72, 203, 228, .5);
+  background: #10283a;
+}
+
+/* Admin tool launchers: clearer hierarchy, no new category grouping */
+.admin-tools-grid { gap: 16px; }
+.admin-tool-card {
+  gap: 12px;
+  padding: 21px;
+  border-radius: 13px;
+  transition: transform .22s var(--ocm-ease), border-color .22s var(--ocm-ease),
+    box-shadow .22s var(--ocm-ease);
+}
+.admin-tool-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(72, 203, 228, .36);
+  box-shadow: 0 11px 25px rgba(0, 8, 18, .17);
+}
+.admin-tool-icon {
+  width: 44px;
+  height: 44px;
+  border-color: rgba(72, 203, 228, .22);
+  border-radius: 11px;
+  background: rgba(3, 4, 94, .22);
+  color: var(--ocm-cyan);
+}
+.admin-tool-page { border-radius: 13px; }
+.admin-tool-page-heading { border-color: var(--color-line); }
+.admin-inbox-stats > div, .admin-inbox-row, .suggestion-item, .admin-list-item {
+  border-radius: 9px;
+}
+.admin-message-dialog, .idea-dialog, .crop-dialog {
+  border-color: rgba(203, 240, 248, .18);
+  border-radius: 14px;
+  background: #0b1e2d;
+}
+
+/* Mobile comfort */
+@media (max-width: 760px) {
+  .main-content { padding-top: 20px; }
+  .history-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
+    gap: 12px;
+  }
+  .history-card { padding: 11px; }
+  .admin-tool-card { padding: 17px; }
+}
+@media (max-width: 420px) {
+  .history-grid { grid-template-columns: minmax(0, 1fr); }
+  .history-card-details h2 { font-size: 15px; }
+}

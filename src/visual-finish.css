@@ -1,0 +1,189 @@
+/* Final visual pass — responsive polish and accessibility for Ocean Blue. */
+:root {
+  --ocm-focus-ring: 0 0 0 3px rgba(72, 203, 228, .2);
+}
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--ocm-cyan);
+  outline-offset: 3px;
+}
+:where(button, a, input, select, textarea):disabled {
+  cursor: not-allowed;
+}
+.app-sidebar .nav-link,
+.mobile-nav .nav-link {
+  position: relative;
+  overflow: hidden;
+  transition: background-color .2s var(--ocm-ease), color .2s var(--ocm-ease),
+    border-color .2s var(--ocm-ease), transform .2s var(--ocm-ease);
+}
+.app-sidebar .nav-link.is-active::before {
+  position: absolute;
+  inset: 8px auto 8px 0;
+  width: 3px;
+  border-radius: 0 4px 4px 0;
+  background: var(--ocm-ice);
+  content: "";
+}
+.mobile-nav .nav-link.is-active {
+  background: rgba(2, 119, 182, .18);
+  color: var(--ocm-ice);
+}
+.panel-heading,
+.admin-tool-page-heading,
+.admin-inbox-heading {
+  gap: 14px;
+}
+.profile-field :is(input, textarea, select),
+.idea-form :is(input, textarea, select),
+.admin-grant-form input[type="email"] {
+  min-width: 0;
+  max-width: 100%;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.profile-field :is(input, textarea, select):focus,
+.idea-form :is(input, textarea, select):focus {
+  box-shadow: var(--ocm-focus-ring);
+}
+.form-message.is-error,
+[role="alert"] {
+  overflow-wrap: anywhere;
+}
+.admin-tools-grid {
+  align-items: stretch;
+}
+.admin-tool-card {
+  min-width: 0;
+}
+.admin-tool-card > p:not(.eyebrow) {
+  color: var(--ocm-muted);
+  line-height: 1.65;
+}
+.admin-tool-card .button-primary {
+  width: 100%;
+  margin-top: auto;
+}
+.admin-inbox-row {
+  min-width: 0;
+  gap: 14px;
+}
+.admin-inbox-row-main,
+.admin-inbox-row-main > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.admin-inbox-row-actions {
+  flex-wrap: wrap;
+}
+.history-card-image {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  background: rgba(3, 4, 94, .14);
+}
+.history-card-details h2 {
+  overflow-wrap: anywhere;
+}
+.history-actions {
+  display: flex;
+  flex-wrap: wrap;
+}
+.history-actions > * {
+  flex: 1 1 145px;
+  min-width: 0;
+}
+.button-primary,
+.button-secondary,
+.button-danger,
+.history-delete-button {
+  transition: background-color .2s var(--ocm-ease), color .2s var(--ocm-ease),
+    border-color .2s var(--ocm-ease), box-shadow .2s var(--ocm-ease),
+    transform .2s var(--ocm-ease);
+}
+@media (min-width: 761px) {
+  .main-content {
+    max-width: 1600px;
+    width: 100%;
+    margin-inline: auto;
+  }
+}
+@media (max-width: 760px) {
+  .app-header {
+    gap: 8px;
+  }
+  .account-status {
+    max-width: 48%;
+  }
+  .account-email {
+    max-width: 20vw;
+  }
+  .main-content > * {
+    min-width: 0;
+  }
+  .admin-inbox-heading,
+  .admin-tool-page-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .admin-inbox-heading > .button-secondary,
+  .admin-tool-page-heading > .button-secondary {
+    width: 100%;
+  }
+  .admin-inbox-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .admin-inbox-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-inbox-row-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .admin-inbox-pagination,
+  .admin-inbox-pagination > div {
+    align-items: stretch;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+@media (max-width: 420px) {
+  .brand {
+    gap: 7px;
+  }
+  .brand-logo {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+  }
+  .brand-copy strong {
+    font-size: 10px;
+  }
+  .brand-copy span {
+    font-size: 9px;
+  }
+  .account-status {
+    gap: 5px;
+    padding: 5px 6px;
+    font-size: 10px;
+  }
+  .account-email {
+    max-width: 17vw;
+  }
+  .account-button {
+    padding: 4px 5px;
+    font-size: 9px;
+  }
+  .admin-inbox-row-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .history-actions > * {
+    flex-basis: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

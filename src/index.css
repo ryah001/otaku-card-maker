@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&display=swap');
 @import "tailwindcss";
+@import "./visual-refresh.css";
 @font-face {
   font-family: 'Backfired';
   src: url('./assets/Backfired.ttf') format('truetype');
@@ -15,5 +16,3 @@
 .font-backfired {
   font-family: 'Backfired', sans-serif;
 }
-
-@import "./visual-refresh.css";

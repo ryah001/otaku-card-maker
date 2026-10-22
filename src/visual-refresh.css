@@ -1,0 +1,268 @@
+/* Otaku Card Maker — Ocean Blue visual refresh */
+:root {
+  color-scheme: dark;
+  --ocm-navy: #03045e;
+  --ocm-ocean: #0277b6;
+  --ocm-cyan: #48cbe4;
+  --ocm-ice: #cbf0f8;
+  --ocm-bg: #061522;
+  --ocm-surface: #0b1e2d;
+  --ocm-surface-raised: #10283a;
+  --ocm-border: rgba(203, 240, 248, .14);
+  --ocm-text: #f4fbff;
+  --ocm-muted: #a9c1ce;
+  --ocm-gradient: linear-gradient(105deg, #03045e 0%, #0277b6 45%, #48cbe4 78%, #cbf0f8 100%);
+  --ocm-ease: cubic-bezier(.22, 1, .36, 1);
+}
+html { scroll-behavior: smooth; }
+body {
+  background-color: var(--ocm-bg);
+  color: var(--ocm-text);
+  -webkit-font-smoothing: antialiased;
+}
+button, a, input, select, textarea, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+button, a, input, select, textarea {
+  transition: color .2s var(--ocm-ease), background-color .2s var(--ocm-ease),
+    border-color .2s var(--ocm-ease), box-shadow .2s var(--ocm-ease),
+    transform .22s var(--ocm-ease), opacity .2s ease;
+}
+button { cursor: pointer; }
+button:focus-visible, a:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--ocm-cyan);
+  outline-offset: 3px;
+}
+::selection { background: rgba(72, 203, 228, .28); color: #fff; }
+/* Subtle Ocean Blue accents on common interactive controls */
+button:hover:not(:disabled) { border-color: rgba(72, 203, 228, .55); }
+button:active:not(:disabled) { transform: translateY(1px) scale(.99); }
+input, select, textarea {
+  accent-color: var(--ocm-cyan);
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--ocm-cyan) !important;
+  box-shadow: 0 0 0 3px rgba(72, 203, 228, .12);
+}
+/* Smooth page/content entrance without changing card artwork or card colors */
+@keyframes ocm-page-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+main, [role="main"] {
+  animation: ocm-page-enter .38s var(--ocm-ease) both;
+}
+dialog, [role="dialog"] {
+  animation: ocm-page-enter .24s var(--ocm-ease) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+
+/* Component polish: Ocean Blue, clean and professional */
+:root {
+  --color-bg: #061522;
+  --color-panel: #0b1e2d;
+  --color-panel-soft: #10283a;
+  --color-line: rgba(203, 240, 248, .16);
+  --color-text: #f4fbff;
+  --color-muted: #a9c1ce;
+  --color-subtle: #7895a5;
+  --color-blue: #0277b6;
+  --color-cyan: #48cbe4;
+  --color-green: #48cbe4;
+}
+.app-header, .app-sidebar {
+  border-color: var(--color-line);
+  background: #061522;
+}
+.app-header { background: rgba(6, 21, 34, .96); backdrop-filter: blur(14px); }
+.app-sidebar { background: #071925; }
+.nav-link { border-radius: 9px; }
+.nav-link.is-active {
+  border-color: rgba(72, 203, 228, .48);
+  background: var(--ocm-gradient);
+  box-shadow: 0 5px 16px rgba(2, 119, 182, .15);
+}
+.panel {
+  border-color: var(--color-line);
+  border-radius: 12px;
+  background: linear-gradient(155deg, #10283a, #0a1d2b);
+  box-shadow: 0 10px 28px rgba(0, 8, 18, .12);
+}
+.button-primary {
+  border-color: #0277b6;
+  background: var(--ocm-gradient);
+  background-size: 160% 100%;
+  color: #041522;
+  box-shadow: 0 4px 14px rgba(2, 119, 182, .15);
+}
+.button-primary:hover:not(:disabled) {
+  background-position: 100% 0;
+  color: #03121d;
+  box-shadow: 0 6px 18px rgba(72, 203, 228, .18);
+}
+.button-secondary, .account-button {
+  border-color: var(--color-line);
+  border-radius: 8px;
+  background: #0a2030;
+}
+.profile-field input, .profile-field textarea, .profile-field select,
+.idea-form input, .idea-form textarea, .idea-form select,
+.admin-grant-form input[type="email"] {
+  border-color: var(--color-line);
+  border-radius: 8px;
+  background: #071925;
+}
+.eyebrow { color: var(--ocm-cyan); }
+.page-heading h1 { letter-spacing: -.025em; }
+.main-content > * {
+  animation: ocm-page-enter .32s var(--ocm-ease) both;
+}
+.main-content > *:nth-child(2) { animation-delay: .035s; }
+
+/* Mes cartes: refine the gallery without touching the card artwork */
+.history-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr));
+  gap: 18px;
+}
+.history-card {
+  padding: 13px;
+  border-radius: 13px;
+  background: linear-gradient(160deg, #10283a, #091b29);
+  transition: border-color .22s var(--ocm-ease), transform .22s var(--ocm-ease),
+    box-shadow .22s var(--ocm-ease);
+}
+.history-card:hover {
+  border-color: rgba(72, 203, 228, .38);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(0, 8, 18, .2);
+}
+.history-card-image { border-radius: 8px; }
+.history-card-details { gap: 9px; padding: 14px 3px 3px; }
+.history-card-details h2 { font-size: 16px; line-height: 1.4; }
+.history-card-details time, .history-card-details p { font-size: 12px; line-height: 1.5; }
+.history-expiration {
+  padding: 8px 10px;
+  border: 1px solid rgba(72, 203, 228, .17);
+  border-radius: 8px;
+  background: rgba(3, 4, 94, .18);
+  color: var(--ocm-ice) !important;
+}
+.history-expiration span { display: block; margin-top: 2px; }
+.history-actions { gap: 8px; }
+.history-actions .button-primary, .history-actions .history-delete-button {
+  min-height: 42px;
+  border-radius: 8px;
+}
+.history-delete-button {
+  border-color: rgba(203, 240, 248, .2);
+  border-radius: 8px;
+  background: rgba(6, 21, 34, .8);
+  color: #d5e8ef;
+}
+.history-delete-button:hover:not(:disabled) {
+  border-color: rgba(72, 203, 228, .5);
+  background: #10283a;
+}
+
+/* Admin tool launchers: clearer hierarchy, no new category grouping */
+.admin-tools-grid { gap: 16px; }
+.admin-tool-card {
+  gap: 12px;
+  padding: 21px;
+  border-radius: 13px;
+  transition: transform .22s var(--ocm-ease), border-color .22s var(--ocm-ease),
+    box-shadow .22s var(--ocm-ease);
+}
+.admin-tool-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(72, 203, 228, .36);
+  box-shadow: 0 11px 25px rgba(0, 8, 18, .17);
+}
+.admin-tool-icon {
+  width: 44px;
+  height: 44px;
+  border-color: rgba(72, 203, 228, .22);
+  border-radius: 11px;
+  background: rgba(3, 4, 94, .22);
+  color: var(--ocm-cyan);
+}
+.admin-tool-page { border-radius: 13px; }
+.admin-tool-page-heading { border-color: var(--color-line); }
+.admin-inbox-stats > div, .admin-inbox-row, .suggestion-item, .admin-list-item {
+  border-radius: 9px;
+}
+.admin-message-dialog, .idea-dialog, .crop-dialog {
+  border-color: rgba(203, 240, 248, .18);
+  border-radius: 14px;
+  background: #0b1e2d;
+}
+
+/* Mobile comfort */
+@media (max-width: 760px) {
+  .main-content { padding-top: 20px; }
+  .history-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
+    gap: 12px;
+  }
+  .history-card { padding: 11px; }
+  .admin-tool-card { padding: 17px; }
+}
+@media (max-width: 420px) {
+  .history-grid { grid-template-columns: minmax(0, 1fr); }
+  .history-card-details h2 { font-size: 15px; }
+}
+
+
+/* Home / creator workspace refinement */
+.app-shell { background: radial-gradient(ellipse at 88% 0%, rgba(2,119,182,.09), transparent 34rem), #061522; }
+.app-header { min-height:76px; border-bottom-color:rgba(203,240,248,.13); }
+.brand { gap:12px; }
+.brand-logo { filter:drop-shadow(0 4px 12px rgba(2,119,182,.16)); }
+.brand-copy strong { letter-spacing:.035em; }
+.account-status { border-color:rgba(203,240,248,.15); border-radius:9px; background:rgba(7,25,37,.82); }
+.account-dot.is-connected { background:#48cbe4; }
+.account-button:hover:not(:disabled) { border-color:rgba(72,203,228,.48); background:#10283a; }
+.main-content { isolation:isolate; animation:ocm-page-enter .3s var(--ocm-ease) both; }
+.page-heading { margin-bottom:28px; }
+.page-heading .eyebrow { display:inline-flex; align-items:center; gap:8px; padding:6px 9px; border:1px solid rgba(72,203,228,.18); border-radius:6px; background:rgba(3,4,94,.18); }
+.page-heading h1 { margin-top:4px; font-size:clamp(27px,3vw,36px); letter-spacing:-.035em; }
+.page-heading > p:last-child { max-width:620px; }
+.create-layout { gap:18px; }
+.profile-panel, .preview-panel, .about-panel { padding:clamp(16px,2vw,24px); }
+.panel-heading { padding-bottom:14px; border-bottom:1px solid rgba(203,240,248,.1); }
+.step-index { display:inline-flex; min-width:34px; min-height:30px; align-items:center; justify-content:center; border:1px solid rgba(72,203,228,.2); border-radius:7px; background:rgba(3,4,94,.22); }
+.profile-form { gap:16px 13px; }
+.profile-field { gap:8px; }
+.profile-field input, .profile-field textarea, .profile-field select, .idea-form input, .idea-form textarea, .idea-form select { min-height:44px; border-radius:8px; background-color:rgba(4,19,31,.9); }
+.profile-field input:hover, .profile-field textarea:hover, .profile-field select:hover { border-color:rgba(72,203,228,.28); }
+.panel-footnote { border-top-color:rgba(203,240,248,.1); }
+.empty-state { border-radius:14px; background:linear-gradient(150deg,rgba(16,40,58,.94),rgba(7,25,37,.98)); }
+.empty-mark { display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(72,203,228,.24); background:rgba(3,4,94,.24); color:#cbf0f8; }
+.button-primary, .button-secondary, .account-button { min-height:40px; border-radius:8px; }
+.button-primary { font-weight:650; }
+.social-list a { border-radius:8px; }
+.header-idea-button { border-radius:9px; transition:transform .22s var(--ocm-ease),background-color .22s var(--ocm-ease); }
+.header-idea-button:hover { transform:translateY(-1px); }
+@media (max-width:900px) { .header-community { display:none; } }
+@media (max-width:760px) {
+ .app-header { gap:10px; padding:9px 14px; }
+ .brand-logo { width:42px; height:42px; flex-basis:42px; }
+ .brand-copy strong { font-size:12px; }
+ .brand-copy span { font-size:10px; }
+ .account-status { gap:6px; padding:6px 7px; }
+ .account-email { max-width:100px; }
+ .account-button { min-height:34px; font-size:10px; }
+ .page-heading { margin-bottom:20px; }
+ .page-heading h1 { font-size:clamp(25px,7vw,32px); }
+ .create-layout { gap:13px; }
+ .panel-heading { margin-bottom:15px; }
+}

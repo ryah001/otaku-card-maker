@@ -1,21 +1,17 @@
 {
-  "id": "/otaku-card-maker/",
+  "id": "./",
   "name": "Carte Otaku",
   "short_name": "Carte Otaku",
-  "description": "Crée et personnalise ta carte Otaku.",
+  "description": "Crée et personnalise ta carte Otaku avec HUNTERS ANIMES.",
   "lang": "fr",
-  "start_url": "/otaku-card-maker/",
-  "scope": "/otaku-card-maker/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#061225",
-  "theme_color": "#0277B6",
+  "orientation": "portrait-primary",
+  "background_color": "#03045E",
+  "theme_color": "#03045E",
+  "categories": ["entertainment", "lifestyle"],
   "icons": [
-    {
-      "src": "/otaku-card-maker/icons/carte-otaku.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    }
+    { "src": "./icons/carte-otaku.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]
 }

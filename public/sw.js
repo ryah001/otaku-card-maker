@@ -1,66 +1,54 @@
-const CACHE_PREFIX = "carte-otaku-";
-const CACHE_VERSION = "v1";
-const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
-const APP_ROOT = "/otaku-card-maker/";
-const APP_SHELL = [
-  APP_ROOT,
-  APP_ROOT + "index.html",
-  APP_ROOT + "manifest.webmanifest",
-  APP_ROOT + "icons/carte-otaku.svg"
-];
+const CACHE_NAME = 'carte-otaku-shell-v1';
+const APP_BASE = new URL('./', self.registration.scope).pathname;
 
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
-  );
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.add(new URL('./', self.registration.scope).href)));
 });
 
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(
-        keys.filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
-      ))
-      .then(() => self.clients.claim())
-  );
+self.addEventListener('activate', (event) => {
+  event.waitUntil((async () => {
+    const names = await caches.keys();
+    await Promise.all(names.filter((name) => name.startsWith('carte-otaku-shell-') && name !== CACHE_NAME).map((name) => caches.delete(name)));
+    await self.clients.claim();
+  })());
 });
 
-self.addEventListener("fetch", (event) => {
+self.addEventListener('fetch', (event) => {
   const request = event.request;
+  if (request.method !== 'GET') return;
   const url = new URL(request.url);
+  if (url.origin !== self.location.origin || !url.pathname.startsWith(APP_BASE)) return;
 
-  if (request.method !== "GET" || url.origin !== self.location.origin) return;
-  if (!url.pathname.startsWith(APP_ROOT)) return;
-
-  // Les pages HTML passent par le réseau en priorité pour récupérer les nouvelles versions.
-  if (request.mode === "navigate") {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          if (response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(APP_ROOT + "index.html", copy));
-          }
-          return response;
-        })
-        .catch(async () => (await caches.match(request)) || (await caches.match(APP_ROOT + "index.html")))
-    );
+  if (request.mode === 'navigate') {
+    event.respondWith((async () => {
+      try {
+        const fresh = await fetch(request, { cache: 'no-cache' });
+        if (fresh.ok) {
+          const cache = await caches.open(CACHE_NAME);
+          await cache.put(request, fresh.clone());
+        }
+        return fresh;
+      } catch {
+        return (await caches.match(request)) || (await caches.match(new URL('./', self.registration.scope).href));
+      }
+    })());
     return;
   }
 
-  // Ne met en cache que les ressources de l'application, jamais les appels API externes.
-  if (url.pathname.includes("/assets/") || url.pathname === APP_ROOT + "manifest.webmanifest" || url.pathname.startsWith(APP_ROOT + "icons/")) {
-    event.respondWith(
-      caches.match(request).then((cached) => {
-        const network = fetch(request).then((response) => {
-          if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone()));
-          return response;
-        });
-        return cached || network;
-      })
-    );
+  // Cache only same-origin app files. Network-first keeps deployed assets fresh after a refresh.
+  if (url.pathname.includes('/assets/') || url.pathname.endsWith('.svg') || url.pathname.endsWith('.webmanifest')) {
+    event.respondWith((async () => {
+      try {
+        const fresh = await fetch(request, { cache: 'no-cache' });
+        if (fresh.ok) {
+          const cache = await caches.open(CACHE_NAME);
+          await cache.put(request, fresh.clone());
+        }
+        return fresh;
+      } catch {
+        return (await caches.match(request)) || Response.error();
+      }
+    })());
   }
 });

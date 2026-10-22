@@ -1,0 +1,21 @@
+{
+  "id": "/otaku-card-maker/",
+  "name": "Carte Otaku",
+  "short_name": "Carte Otaku",
+  "description": "Crée et personnalise ta carte Otaku.",
+  "lang": "fr",
+  "start_url": "/otaku-card-maker/",
+  "scope": "/otaku-card-maker/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#061225",
+  "theme_color": "#0277B6",
+  "icons": [
+    {
+      "src": "/otaku-card-maker/icons/carte-otaku.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
